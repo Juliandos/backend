@@ -30,4 +30,4 @@ class MarcaResponse(MarcaBase):
     updated_at: datetime
 
     class Config:
-        orm_mode = True   # 🔑 Permite convertir desde SQLAlchemy a Pydantic
+        from_attributes = True   # 🔑 Permite convertir desde SQLAlchemy a Pydantic

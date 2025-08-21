@@ -30,4 +30,4 @@ class UsuarioResponse(UsuarioBase):
     marcas: List[MarcaResponse] = []   # relación con Marca
 
     class Config:
-        orm_mode = True
+        from_attributes = True

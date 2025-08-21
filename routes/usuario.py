@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
+from auth.security import get_password_hash
 from database import get_db
 from models.usuario import Usuario
 from schemas.usuario import UsuarioCreate, UsuarioResponse, UsuarioUpdate
@@ -62,3 +63,40 @@ def delete_usuario(usuario_id: int, db: Session = Depends(get_db)):
     db.delete(usuario)
     db.commit()
     return {"msg": "Usuario eliminado correctamente"}
+
+@router.post("/registro", response_model=UsuarioResponse)
+def create_user(user: UsuarioCreate, db: Session = Depends(get_db)):
+    try:
+        # Verificar si ya existe
+        db_user = db.query(Usuario).filter(Usuario.correo == user.correo).first()
+        if db_user:
+            raise HTTPException(status_code=400, detail="El correo ya está registrado")
+
+        # Hashear contraseña
+        hashed_pw = get_password_hash(user.password)
+
+        new_user = Usuario(
+            nombre=user.nombre,
+            correo=user.correo,
+            password=hashed_pw
+        )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+
+        return new_user
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    # try:
+    #     from datetime import datetime
+    #     modelo = UsuarioResponse()
+    #     modelo.id = 1
+    #     modelo.correo = 'ABC'
+    #     modelo.nombre = 'Julian'
+    #     modelo.marcas = []
+    #     modelo.created_at = datetime.now()
+    #     modelo.updated_at = datetime.now()
+    #     return modelo
+    # except Exception as e:
+    #     raise HTTPException(status_code=500, detail=str(e))
