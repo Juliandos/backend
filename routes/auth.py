@@ -39,6 +39,30 @@ def login_for_access_token(
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
+from pydantic import BaseModel, EmailStr
+
+class LoginSchema(BaseModel):
+    email: EmailStr
+    password: str
+
+@router.post("/token2")
+def login_for_access_token(
+    form_data: LoginSchema,
+    db: Session = Depends(get_db),
+):
+    user = authenticate_user(db, form_data.email, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Correo o contraseña incorrectos",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.correo}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
 
 @router.get("/me", response_model=UsuarioResponse)
 def read_users_me(current_user: Usuario = Depends(get_current_user)):
