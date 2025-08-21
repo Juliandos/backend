@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from database import engine, Base
 from models import usuario, marca
 from routes import marca as marca_routes
+from routes import usuario as usuario_routes
 
 
 # Crear las tablas en la BD
@@ -11,6 +12,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 app.include_router(marca_routes.router)
+app.include_router(usuario_routes.router)
 
 
 @app.get("/")
