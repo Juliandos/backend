@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
-from auth.security import get_password_hash
+from auth.security import get_password_hash, get_current_user
 from database import get_db
 from models.usuario import Usuario
 from schemas.usuario import UsuarioCreate, UsuarioResponse, UsuarioUpdate
@@ -25,13 +25,13 @@ def create_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
 
 # ------- READ ALL -------
 @router.get("/", response_model=List[UsuarioResponse])
-def get_usuarios(db: Session = Depends(get_db)):
+def get_usuarios(db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_user)):
     return db.query(Usuario).all()
 
 
 # ------- READ ONE -------
 @router.get("/{usuario_id}", response_model=UsuarioResponse)
-def get_usuario(usuario_id: int, db: Session = Depends(get_db)):
+def get_usuario(usuario_id: int, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_user)):
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
@@ -40,7 +40,7 @@ def get_usuario(usuario_id: int, db: Session = Depends(get_db)):
 
 # ------- UPDATE -------
 @router.put("/{usuario_id}", response_model=UsuarioResponse)
-def update_usuario(usuario_id: int, usuario_update: UsuarioUpdate, db: Session = Depends(get_db)):
+def update_usuario(usuario_id: int, usuario_update: UsuarioUpdate, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_user)):
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
@@ -55,7 +55,7 @@ def update_usuario(usuario_id: int, usuario_update: UsuarioUpdate, db: Session =
 
 # ------- DELETE -------
 @router.delete("/{usuario_id}")
-def delete_usuario(usuario_id: int, db: Session = Depends(get_db)):
+def delete_usuario(usuario_id: int, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_user)):
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
@@ -64,8 +64,9 @@ def delete_usuario(usuario_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"msg": "Usuario eliminado correctamente"}
 
+# ------- REGISTRO -------
 @router.post("/registro", response_model=UsuarioResponse)
-def create_user(user: UsuarioCreate, db: Session = Depends(get_db)):
+def create_user(user: UsuarioCreate, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_user)):
     try:
         # Verificar si ya existe
         db_user = db.query(Usuario).filter(Usuario.correo == user.correo).first()
@@ -87,16 +88,3 @@ def create_user(user: UsuarioCreate, db: Session = Depends(get_db)):
         return new_user
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-    # try:
-    #     from datetime import datetime
-    #     modelo = UsuarioResponse()
-    #     modelo.id = 1
-    #     modelo.correo = 'ABC'
-    #     modelo.nombre = 'Julian'
-    #     modelo.marcas = []
-    #     modelo.created_at = datetime.now()
-    #     modelo.updated_at = datetime.now()
-    #     return modelo
-    # except Exception as e:
-    #     raise HTTPException(status_code=500, detail=str(e))
