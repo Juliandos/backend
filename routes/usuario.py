@@ -66,7 +66,7 @@ def delete_usuario(usuario_id: int, db: Session = Depends(get_db), current_user:
 
 # ------- REGISTRO -------
 @router.post("/registro", response_model=UsuarioResponse)
-def create_user(user: UsuarioCreate, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_user)):
+def create_user(user: UsuarioCreate, db: Session = Depends(get_db)):
     try:
         # Verificar si ya existe
         db_user = db.query(Usuario).filter(Usuario.correo == user.correo).first()
@@ -88,3 +88,4 @@ def create_user(user: UsuarioCreate, db: Session = Depends(get_db), current_user
         return new_user
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
