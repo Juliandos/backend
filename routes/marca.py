@@ -13,7 +13,6 @@ router = APIRouter(
     tags=["marcas"]
 )
 
-
 # ------- CREATE -------
 @router.post("/", response_model=MarcaResponse)
 def create_marca(marca: MarcaCreate, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_user)):

@@ -41,7 +41,7 @@ def login_for_access_token(
     access_token = create_access_token(
         data={"sub": user.correo}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer", "correo": form_data.username}
 
 @router.get("/me", response_model=UsuarioResponse)
 def read_users_me(current_user: Usuario = Depends(get_current_user)):

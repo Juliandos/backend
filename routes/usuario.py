@@ -22,12 +22,10 @@ def create_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
     db.refresh(nuevo_usuario)
     return nuevo_usuario
 
-
 # ------- READ ALL -------
 @router.get("/", response_model=List[UsuarioResponse])
 def get_usuarios(db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_user)):
     return db.query(Usuario).all()
-
 
 # ------- READ ONE -------
 @router.get("/{usuario_id}", response_model=UsuarioResponse)
@@ -36,7 +34,6 @@ def get_usuario(usuario_id: int, db: Session = Depends(get_db), current_user: Us
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     return usuario
-
 
 # ------- UPDATE -------
 @router.put("/{usuario_id}", response_model=UsuarioResponse)
@@ -51,7 +48,6 @@ def update_usuario(usuario_id: int, usuario_update: UsuarioUpdate, db: Session =
     db.commit()
     db.refresh(usuario)
     return usuario
-
 
 # ------- DELETE -------
 @router.delete("/{usuario_id}")
